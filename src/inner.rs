@@ -6,6 +6,7 @@ use chrono::prelude::*;
 use std::fmt::Debug;
 use std::fs::{File, OpenOptions};
 use std::path::Path;
+use std::os::unix::fs as unix_fs;
 
 #[derive(Debug)]
 pub(crate) struct InnerAppender {
@@ -64,7 +65,10 @@ impl InnerAppender {
             self.next_date = self.rotation.next_date(&now);
 
             match create_writer(&self.log_directory, &filename) {
-                Ok(writer) => self.writer = writer,
+                Ok(writer) => {
+                    self.writer = writer;
+                    let _ = create_symlink(&self.log_filename_prefix, &self.log_directory, &filename);
+                }
                 Err(err) => eprintln!("Couldn't create writer for logs: {}", err),
             }
         }
@@ -78,6 +82,12 @@ impl InnerAppender {
 fn create_writer(directory: &str, filename: &str) -> io::Result<BufWriter<File>> {
     let file_path = Path::new(directory).join(filename);
     Ok(BufWriter::new(open_file_create_parent_dirs(&file_path)?))
+}
+
+fn create_symlink(symlink_name: &str, directory: &str, filename: &str) -> io::Result<()> {
+    let file_path = Path::new(directory).join(filename);
+    unix_fs::symlink(&file_path, symlink_name)?;
+    Ok(())
 }
 
 fn open_file_create_parent_dirs(path: &Path) -> io::Result<File> {
