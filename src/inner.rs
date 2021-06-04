@@ -89,6 +89,12 @@ fn create_writer(directory: &str, filename: &str) -> io::Result<BufWriter<File>>
 
 fn create_symlink(symlink_name: &str, directory: &str, filename: &str) -> io::Result<()> {
     let file_path = Path::new(directory).join(filename);
+    if Path::new(symlink_name).exists() {
+        let res = fs::remove_file(symlink_name);
+        if res.is_err() {
+            eprintln!("Couldn't remove symlink for logs: {}", res.err().unwrap());
+        }
+    }
     unix_fs::symlink(&file_path, symlink_name)?;
     Ok(())
 }
