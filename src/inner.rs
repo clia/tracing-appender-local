@@ -67,7 +67,10 @@ impl InnerAppender {
             match create_writer(&self.log_directory, &filename) {
                 Ok(writer) => {
                     self.writer = writer;
-                    let _ = create_symlink(&self.log_filename_prefix, &self.log_directory, &filename);
+                    let res = create_symlink(&self.log_filename_prefix, &self.log_directory, &filename);
+                    if res.is_err() {
+                        eprintln!("Couldn't create symlink for logs: {}", res.err().unwrap());
+                    }
                 }
                 Err(err) => eprintln!("Couldn't create writer for logs: {}", err),
             }
