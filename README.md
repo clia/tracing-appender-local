@@ -4,7 +4,7 @@
 
 # tracing-appender-local
 
-Writers for logging events and spans, in Local TimeZone.
+Writers for logging events and spans, in Local TimeZone, and create and roll a symlink.
 
 [![Crates.io][crates-badge]][crates-url]
 [![Documentation][docs-badge]][docs-url]
